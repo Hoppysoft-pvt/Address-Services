@@ -1,5 +1,5 @@
 import "./App.css";
-import Address from "./pages/address";
+import Address from "./lib";
 function App() {
   return (
     <div className="App">
