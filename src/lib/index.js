@@ -217,8 +217,13 @@ const Address = (props) => {
                   <TextField
                     fullWidth
                     value={selectedObj?.city}
-                    InputProps={{ readOnly: true }}
                     name="City"
+                    onChange={(event) => {
+                      setSelectedObj((prevObj) => ({
+                        ...prevObj,
+                        city: event.target.value,
+                      }));
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} sx={{ mt: -1 }}>
@@ -235,8 +240,13 @@ const Address = (props) => {
                   <TextField
                     fullWidth
                     value={selectedObj?.region}
-                    InputProps={{ readOnly: true }}
-                    name="District"
+                    name="State"
+                    onChange={(event) => {
+                      setSelectedObj((prevObj) => ({
+                        ...prevObj,
+                        region: event.target.value,
+                      }));
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={12} sx={{ mt: -1 }}>
@@ -254,7 +264,12 @@ const Address = (props) => {
                     fullWidth
                     value={selectedObj?.postcode}
                     name="ZipCode"
-                    InputProps={{ readOnly: true }}
+                    onChange={(event) => {
+                      setSelectedObj((prevObj) => ({
+                        ...prevObj,
+                        postcode: event.target.value,
+                      }));
+                    }}
                   />
                 </Grid>
               </Grid>
