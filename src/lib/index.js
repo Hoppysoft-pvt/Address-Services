@@ -54,7 +54,12 @@ function FacebookCircularProgress(props) {
 
 // ===========================|| ADDRESS - FORMS ||=========================== //
 
-const Address = (props) => {
+const Address = () => {
+  // const
+  const indexId = "1e2tq2";
+  const apiKey="hs_l63fhj1fdtysx39j";
+
+  // useState
   const [list, setList] = useState([]);
   const [selectedObj, setSelectedObj] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -90,13 +95,13 @@ const Address = (props) => {
 
     await axios
       .post(
-        `https://${props?.indexId}.hoppysearch.com/v1/search`,
+        `https://${indexId}.hoppysearch.com/v1/search`,
         {
           luceneQuery: searchText,
         },
         {
           headers: {
-            Authorization: props?.apiKey,
+            Authorization: apiKey,
           },
         }
       )
