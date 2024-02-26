@@ -184,7 +184,7 @@ const Address = (props) => {
                         </Box>
                       </li>
                     )}
-                    noOptionsText="No options"
+                    noOptionsText={loading ? "Loading..." : "No options"}
                     onInputChange={(event, value) => handleSearchAddress(value)}
                     onChange={(event, newValue) => {
                       if (newValue && newValue.street) {
