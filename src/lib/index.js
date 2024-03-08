@@ -16,7 +16,16 @@ import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress, {
   circularProgressClasses,
 } from "@mui/material/CircularProgress";
+import { styled } from '@mui/system';
 
+const MyAutocomplete = styled(Autocomplete)({
+  '.MuiAutocomplete-endAdornment': {
+    display: 'none',
+  },
+  // '.MuiAutocomplete-noOptions': {
+  //   display: 'none',
+  // },
+});
 function FacebookCircularProgress(props) {
   return (
     <Box sx={{ position: "relative", marginTop: "1%" }}>
@@ -133,8 +142,9 @@ const Address = (props) => {
                   >
                     Address
                   </InputLabel>
-                  <Autocomplete
+                  <MyAutocomplete 
                     options={list}
+                    freeSolo 
                     getOptionLabel={(option) =>
                       `${option.number || ""} ${option.street || ""}`
                     }
@@ -150,6 +160,7 @@ const Address = (props) => {
                         {...params}
                         InputProps={{
                           ...params.InputProps,
+                       
                           endAdornment: (
                             <>
                               {loading ? <FacebookCircularProgress /> : null}
@@ -159,6 +170,7 @@ const Address = (props) => {
                         }}
                       />
                     )}
+                    // noOptionsText={''}
                     renderOption={(props, option, index) => (
                       <li key={option?.hs_guid} {...props}>
                         <Box width={"100%"}>
@@ -184,7 +196,7 @@ const Address = (props) => {
                         </Box>
                       </li>
                     )}
-                    noOptionsText={loading ? "Loading..." : "No options"}
+                    noOptionsText={false}
                     onInputChange={(event, value) => handleSearchAddress(value)}
                     onChange={(event, newValue) => {
                       if (newValue && newValue.street) {
