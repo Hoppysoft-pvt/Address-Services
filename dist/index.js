@@ -10,6 +10,9 @@ require("core-js/modules/es.object.assign.js");
 require("core-js/modules/es.promise.js");
 require("core-js/modules/es.regexp.exec.js");
 require("core-js/modules/es.string.match.js");
+require("core-js/modules/es.string.split.js");
+require("core-js/modules/es.string.starts-with.js");
+require("core-js/modules/es.string.trim.js");
 require("core-js/modules/web.dom-collections.iterator.js");
 var _react = _interopRequireWildcard(require("react"));
 var _axios = _interopRequireDefault(require("axios"));
@@ -70,6 +73,23 @@ const Address = () => {
   const [list, setList] = (0, _react.useState)([]);
   const [selectedObj, setSelectedObj] = (0, _react.useState)([]);
   const [loading, setLoading] = (0, _react.useState)(false);
+
+  // methods
+  const appendStarToWords = str => {
+    var words = str.split(/\s+/);
+    var modifiedSentence = '';
+    for (var i = 0; i < words.length; i++) {
+      var word = words[i];
+      if (i > 0) {
+        modifiedSentence += ' ';
+      }
+      if (word.startsWith('*') || word.startsWith('?')) {
+        word = word.substring(1);
+      }
+      modifiedSentence += word + "*";
+    }
+    return modifiedSentence;
+  };
   const handleSearchAddress = async text => {
     setLoading(true);
     if (!text) {
@@ -77,26 +97,17 @@ const Address = () => {
       setLoading(false);
       return;
     }
-    const firstWord = ((text === null || text === void 0 ? void 0 : text.match(/\S+/)) || [])[0] || "";
-    const secondWords = ((text === null || text === void 0 ? void 0 : text.match(/\S+/g)) || []).slice(1).join(" ");
-    let text1;
-    let text2;
+    const [trimmedString, firstWord, secondWord] = (text.trim().match(/^(\S+)(?:\s(.+))?$/) || []).map(str => str || '');
+    let luceneQuery = "";
     if (!isNaN(firstWord)) {
-      text1 = Number(firstWord);
+      const modifiedStreetQuery = appendStarToWords(secondWord);
+      luceneQuery = secondWord ? "number: ".concat(firstWord, " AND street: ").concat(modifiedStreetQuery) : "number: ".concat(firstWord);
     } else {
-      text1 = "street:".concat(firstWord);
+      const modifiedStreetQuery = appendStarToWords(trimmedString);
+      luceneQuery = "street: ".concat(modifiedStreetQuery);
     }
-    if (secondWords) {
-      if (typeof text1 === "number") {
-        text2 = "AND street:".concat(secondWords);
-      } else if (typeof text1 === "string") {
-        text2 = secondWords;
-      }
-    }
-    let editText1 = typeof text1 === "number" ? "number:".concat(text1) : text1;
-    let searchText = secondWords ? editText1 + " " + text2 : editText1;
     await _axios.default.post("https://".concat(indexId, ".hoppysearch.com/v1/search"), {
-      luceneQuery: searchText
+      luceneQuery: luceneQuery
     }, {
       headers: {
         Authorization: apiKey
