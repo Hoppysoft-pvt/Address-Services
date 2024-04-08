@@ -64,13 +64,13 @@ function FacebookCircularProgress(props) {
 
 // ===========================|| ADDRESS - FORMS ||=========================== //
 
-const Address = () => {
+const Address = props => {
   // const
   const indexId = "1e2tq2";
   const apiKey = "hs_2u37ib6w8wz4137f";
 
   // useState
-  const [list, setList] = (0, _react.useState)([]);
+  const [list1, setList] = (0, _react.useState)([]);
   const [selectedObj, setSelectedObj] = (0, _react.useState)([]);
   const [loading, setLoading] = (0, _react.useState)(false);
 
@@ -106,21 +106,32 @@ const Address = () => {
       const modifiedStreetQuery = appendStarToWords(trimmedString);
       luceneQuery = "street: ".concat(modifiedStreetQuery);
     }
-    await _axios.default.post("https://".concat(indexId, ".hoppysearch.com/v1/search"), {
-      luceneQuery: luceneQuery
-    }, {
-      headers: {
-        Authorization: apiKey
-      }
-    }).then(response => {
-      var _response$data;
+    try {
+      var _response$data, _response$data2;
+      const response = await _axios.default.post("https://".concat(indexId, ".hoppysearch.com/v1/search"), {
+        luceneQuery: luceneQuery
+      }, {
+        headers: {
+          Authorization: apiKey
+        }
+      });
       setList(response === null || response === void 0 || (_response$data = response.data) === null || _response$data === void 0 ? void 0 : _response$data.documents);
+      console.log("******************************************************", luceneQuery, response === null || response === void 0 || (_response$data2 = response.data) === null || _response$data2 === void 0 ? void 0 : _response$data2.documents);
       setLoading(false);
-    }).catch(err => {
-      console.log(err);
+    } catch (error) {
+      console.log(error);
       setLoading(false);
-    });
+    }
   };
+  (0, _react.useEffect)(() => {
+    props.onChange({
+      StreetNumber: selectedObj.number,
+      Street: selectedObj.street,
+      City: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.city,
+      State: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.region,
+      ZipCode: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.postcode
+    });
+  }, [selectedObj]);
   return /*#__PURE__*/_react.default.createElement(_material.Container, null, /*#__PURE__*/_react.default.createElement(_material.Grid, {
     container: true,
     justifyContent: "center",
@@ -172,7 +183,7 @@ const Address = () => {
       fontWeight: 500
     }
   }, "Address"), /*#__PURE__*/_react.default.createElement(_Autocomplete.default, {
-    options: list,
+    options: list1,
     getOptionLabel: option => "".concat(option.number || "", " ").concat(option.street || ""),
     isOptionEqualToValue: (option, value) => option.street === value.street && option.city === value.city && option.hs_guid === value.hs_guid && option.postcode === value.postcode && option.region === value.region,
     renderInput: params => /*#__PURE__*/_react.default.createElement(_material.TextField, _extends({}, params, {
@@ -204,8 +215,8 @@ const Address = () => {
     onInputChange: (event, value) => handleSearchAddress(value),
     onChange: (event, newValue) => {
       if (newValue && newValue.street) {
-        const selectedIndex = list.indexOf(newValue);
-        const obj = list[selectedIndex];
+        const selectedIndex = list1.indexOf(newValue);
+        const obj = list1[selectedIndex];
         setSelectedObj(obj);
         const fullAddress = "".concat(newValue.number, " ").concat(newValue.street);
         handleSearchAddress(fullAddress);

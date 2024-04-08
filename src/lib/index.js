@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 // material-ui
 import {
@@ -54,7 +54,7 @@ function FacebookCircularProgress(props) {
 
 // ===========================|| ADDRESS - FORMS ||=========================== //
 
-const Address = () => {
+const Address = (props) => {
   // const
   const indexId = "1e2tq2";
   const apiKey = "hs_2u37ib6w8wz4137f";
@@ -120,6 +120,17 @@ const Address = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    props.onChange({
+      StreetNumber: selectedObj.number,
+      Street: selectedObj.street,
+      City: selectedObj?.city,
+      State: selectedObj?.region,
+      ZipCode: selectedObj?.postcode
+    })
+  },[selectedObj])
+
   return (
     <Container>
       <Grid container justifyContent="center" spacing={3}>
