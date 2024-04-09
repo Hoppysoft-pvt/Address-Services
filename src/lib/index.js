@@ -113,7 +113,6 @@ const Address = (props) => {
           }
         )
       setList(response?.data?.documents);
-      console.log("******************************************************",luceneQuery, response?.data?.documents);
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -122,13 +121,15 @@ const Address = (props) => {
   };
 
   useEffect(() => {
-    props.onChange({
-      StreetNumber: selectedObj.number,
-      Street: selectedObj.street,
-      City: selectedObj?.city,
-      State: selectedObj?.region,
-      ZipCode: selectedObj?.postcode
-    })
+    if (props.onChange) {
+      props.onChange({
+        StreetNumber: selectedObj?.number,
+        Street: selectedObj?.street,
+        City: selectedObj?.city,
+        State: selectedObj?.region,
+        ZipCode: selectedObj?.postcode
+      })      
+    }
   },[selectedObj])
 
   return (

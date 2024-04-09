@@ -107,7 +107,7 @@ const Address = props => {
       luceneQuery = "street: ".concat(modifiedStreetQuery);
     }
     try {
-      var _response$data, _response$data2;
+      var _response$data;
       const response = await _axios.default.post("https://".concat(indexId, ".hoppysearch.com/v1/search"), {
         luceneQuery: luceneQuery
       }, {
@@ -116,7 +116,6 @@ const Address = props => {
         }
       });
       setList(response === null || response === void 0 || (_response$data = response.data) === null || _response$data === void 0 ? void 0 : _response$data.documents);
-      console.log("******************************************************", luceneQuery, response === null || response === void 0 || (_response$data2 = response.data) === null || _response$data2 === void 0 ? void 0 : _response$data2.documents);
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -124,13 +123,15 @@ const Address = props => {
     }
   };
   (0, _react.useEffect)(() => {
-    props.onChange({
-      StreetNumber: selectedObj.number,
-      Street: selectedObj.street,
-      City: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.city,
-      State: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.region,
-      ZipCode: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.postcode
-    });
+    if (props.onChange) {
+      props.onChange({
+        StreetNumber: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.number,
+        Street: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.street,
+        City: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.city,
+        State: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.region,
+        ZipCode: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.postcode
+      });
+    }
   }, [selectedObj]);
   return /*#__PURE__*/_react.default.createElement(_material.Container, null, /*#__PURE__*/_react.default.createElement(_material.Grid, {
     container: true,
