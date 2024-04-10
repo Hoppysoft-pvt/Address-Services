@@ -45,6 +45,8 @@ import Address from "address-service";
 
 3. Use the component in your project:
 
+#### Javascript
+
 ```javascript
 import Address from "address-service";
 function App() {
