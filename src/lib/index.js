@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 // material-ui
 import {
@@ -54,15 +54,32 @@ function FacebookCircularProgress(props) {
 
 // ===========================|| ADDRESS - FORMS ||=========================== //
 
-const Address = () => {
+const Address = (props) => {
   // const
   const indexId = "1e2tq2";
-  const apiKey="hs_2u37ib6w8wz4137f";
+  const apiKey = "hs_2u37ib6w8wz4137f";
 
   // useState
-  const [list, setList] = useState([]);
+  const [list1, setList] = useState([]);
   const [selectedObj, setSelectedObj] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // methods
+  const appendStarToWords = (str) => {
+    var words = str.split(/\s+/);
+    var modifiedSentence = '';
+    for (var i = 0; i < words.length; i++) {
+      var word = words[i];
+      if (i > 0) {
+        modifiedSentence += ' ';
+      }
+      if (word.startsWith('*') || word.startsWith('?')) {
+        word = word.substring(1);
+      }
+      modifiedSentence += word + "*";
+    }
+    return modifiedSentence;
+  }
 
   const handleSearchAddress = async (text) => {
     setLoading(true);
@@ -72,48 +89,49 @@ const Address = () => {
       setLoading(false);
       return;
     }
-
-    const firstWord = (text?.match(/\S+/) || [])[0] || "";
-    const secondWords = (text?.match(/\S+/g) || []).slice(1).join(" ");
-
-    let text1;
-    let text2;
+    const [trimmedString, firstWord, secondWord] = (text.trim().match(/^(\S+)(?:\s(.+))?$/) || []).map(str => str || '');
+    let luceneQuery = ""
     if (!isNaN(firstWord)) {
-      text1 = Number(firstWord);
+      const modifiedStreetQuery = appendStarToWords(secondWord)
+      luceneQuery = secondWord ? `number: ${firstWord} AND street: ${modifiedStreetQuery}` : `number: ${firstWord}`
     } else {
-      text1 = `street:${firstWord}`;
+      const modifiedStreetQuery = appendStarToWords(trimmedString)
+      luceneQuery = `street: ${modifiedStreetQuery}`
     }
-    if (secondWords) {
-      if (typeof text1 === "number") {
-        text2 = `AND street:${secondWords}`;
-      } else if (typeof text1 === "string") {
-        text2 = secondWords;
-      }
-    }
-    let editText1 = typeof text1 === "number" ? `number:${text1}` : text1;
-    let searchText = secondWords ? editText1 + " " + text2 : editText1;
 
-    await axios
-      .post(
-        `https://${indexId}.hoppysearch.com/v1/search`,
-        {
-          luceneQuery: searchText,
-        },
-        {
-          headers: {
-            Authorization: apiKey,
+    try {
+      const response = await axios
+        .post(
+          `https://${indexId}.hoppysearch.com/v1/search`,
+          {
+            luceneQuery: luceneQuery,
           },
-        }
-      )
-      .then((response) => {
-        setList(response?.data?.documents);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-      });
+          {
+            headers: {
+              Authorization: apiKey,
+            },
+          }
+        )
+      setList(response?.data?.documents);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    if (props.onChange) {
+      props.onChange({
+        StreetNumber: selectedObj?.number,
+        Street: selectedObj?.street,
+        City: selectedObj?.city,
+        State: selectedObj?.region,
+        ZipCode: selectedObj?.postcode
+      })
+    }
+  }, [selectedObj])
+
   return (
     <Container>
       <Grid container justifyContent="center" spacing={3}>
@@ -139,7 +157,8 @@ const Address = () => {
                     Address
                   </InputLabel>
                   <Autocomplete
-                    options={list}
+                    options={list1}
+                    filterOptions={(options) => options}
                     getOptionLabel={(option) =>
                       `${option.number || ""} ${option.street || ""}`
                     }
@@ -193,8 +212,8 @@ const Address = () => {
                     onInputChange={(event, value) => handleSearchAddress(value)}
                     onChange={(event, newValue) => {
                       if (newValue && newValue.street) {
-                        const selectedIndex = list.indexOf(newValue);
-                        const obj = list[selectedIndex];
+                        const selectedIndex = list1.indexOf(newValue);
+                        const obj = list1[selectedIndex];
                         setSelectedObj(obj);
                         const fullAddress = `${newValue.number} ${newValue.street}`;
                         handleSearchAddress(fullAddress);

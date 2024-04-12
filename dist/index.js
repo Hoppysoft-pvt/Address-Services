@@ -10,6 +10,9 @@ require("core-js/modules/es.object.assign.js");
 require("core-js/modules/es.promise.js");
 require("core-js/modules/es.regexp.exec.js");
 require("core-js/modules/es.string.match.js");
+require("core-js/modules/es.string.split.js");
+require("core-js/modules/es.string.starts-with.js");
+require("core-js/modules/es.string.trim.js");
 require("core-js/modules/web.dom-collections.iterator.js");
 var _react = _interopRequireWildcard(require("react"));
 var _axios = _interopRequireDefault(require("axios"));
@@ -61,15 +64,32 @@ function FacebookCircularProgress(props) {
 
 // ===========================|| ADDRESS - FORMS ||=========================== //
 
-const Address = () => {
+const Address = props => {
   // const
   const indexId = "1e2tq2";
   const apiKey = "hs_2u37ib6w8wz4137f";
 
   // useState
-  const [list, setList] = (0, _react.useState)([]);
+  const [list1, setList] = (0, _react.useState)([]);
   const [selectedObj, setSelectedObj] = (0, _react.useState)([]);
   const [loading, setLoading] = (0, _react.useState)(false);
+
+  // methods
+  const appendStarToWords = str => {
+    var words = str.split(/\s+/);
+    var modifiedSentence = '';
+    for (var i = 0; i < words.length; i++) {
+      var word = words[i];
+      if (i > 0) {
+        modifiedSentence += ' ';
+      }
+      if (word.startsWith('*') || word.startsWith('?')) {
+        word = word.substring(1);
+      }
+      modifiedSentence += word + "*";
+    }
+    return modifiedSentence;
+  };
   const handleSearchAddress = async text => {
     setLoading(true);
     if (!text) {
@@ -77,39 +97,42 @@ const Address = () => {
       setLoading(false);
       return;
     }
-    const firstWord = ((text === null || text === void 0 ? void 0 : text.match(/\S+/)) || [])[0] || "";
-    const secondWords = ((text === null || text === void 0 ? void 0 : text.match(/\S+/g)) || []).slice(1).join(" ");
-    let text1;
-    let text2;
+    const [trimmedString, firstWord, secondWord] = (text.trim().match(/^(\S+)(?:\s(.+))?$/) || []).map(str => str || '');
+    let luceneQuery = "";
     if (!isNaN(firstWord)) {
-      text1 = Number(firstWord);
+      const modifiedStreetQuery = appendStarToWords(secondWord);
+      luceneQuery = secondWord ? "number: ".concat(firstWord, " AND street: ").concat(modifiedStreetQuery) : "number: ".concat(firstWord);
     } else {
-      text1 = "street:".concat(firstWord);
+      const modifiedStreetQuery = appendStarToWords(trimmedString);
+      luceneQuery = "street: ".concat(modifiedStreetQuery);
     }
-    if (secondWords) {
-      if (typeof text1 === "number") {
-        text2 = "AND street:".concat(secondWords);
-      } else if (typeof text1 === "string") {
-        text2 = secondWords;
-      }
-    }
-    let editText1 = typeof text1 === "number" ? "number:".concat(text1) : text1;
-    let searchText = secondWords ? editText1 + " " + text2 : editText1;
-    await _axios.default.post("https://".concat(indexId, ".hoppysearch.com/v1/search"), {
-      luceneQuery: searchText
-    }, {
-      headers: {
-        Authorization: apiKey
-      }
-    }).then(response => {
+    try {
       var _response$data;
+      const response = await _axios.default.post("https://".concat(indexId, ".hoppysearch.com/v1/search"), {
+        luceneQuery: luceneQuery
+      }, {
+        headers: {
+          Authorization: apiKey
+        }
+      });
       setList(response === null || response === void 0 || (_response$data = response.data) === null || _response$data === void 0 ? void 0 : _response$data.documents);
       setLoading(false);
-    }).catch(err => {
-      console.log(err);
+    } catch (error) {
+      console.log(error);
       setLoading(false);
-    });
+    }
   };
+  (0, _react.useEffect)(() => {
+    if (props.onChange) {
+      props.onChange({
+        StreetNumber: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.number,
+        Street: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.street,
+        City: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.city,
+        State: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.region,
+        ZipCode: selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.postcode
+      });
+    }
+  }, [selectedObj]);
   return /*#__PURE__*/_react.default.createElement(_material.Container, null, /*#__PURE__*/_react.default.createElement(_material.Grid, {
     container: true,
     justifyContent: "center",
@@ -161,7 +184,8 @@ const Address = () => {
       fontWeight: 500
     }
   }, "Address"), /*#__PURE__*/_react.default.createElement(_Autocomplete.default, {
-    options: list,
+    options: list1,
+    filterOptions: options => options,
     getOptionLabel: option => "".concat(option.number || "", " ").concat(option.street || ""),
     isOptionEqualToValue: (option, value) => option.street === value.street && option.city === value.city && option.hs_guid === value.hs_guid && option.postcode === value.postcode && option.region === value.region,
     renderInput: params => /*#__PURE__*/_react.default.createElement(_material.TextField, _extends({}, params, {
@@ -193,8 +217,8 @@ const Address = () => {
     onInputChange: (event, value) => handleSearchAddress(value),
     onChange: (event, newValue) => {
       if (newValue && newValue.street) {
-        const selectedIndex = list.indexOf(newValue);
-        const obj = list[selectedIndex];
+        const selectedIndex = list1.indexOf(newValue);
+        const obj = list1[selectedIndex];
         setSelectedObj(obj);
         const fullAddress = "".concat(newValue.number, " ").concat(newValue.street);
         handleSearchAddress(fullAddress);
