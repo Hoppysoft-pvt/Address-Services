@@ -185,6 +185,7 @@ const Address = props => {
     }
   }, "Address"), /*#__PURE__*/_react.default.createElement(_Autocomplete.default, {
     options: list1,
+    filterOptions: options => options,
     getOptionLabel: option => "".concat(option.number || "", " ").concat(option.street || ""),
     isOptionEqualToValue: (option, value) => option.street === value.street && option.city === value.city && option.hs_guid === value.hs_guid && option.postcode === value.postcode && option.region === value.region,
     renderInput: params => /*#__PURE__*/_react.default.createElement(_material.TextField, _extends({}, params, {

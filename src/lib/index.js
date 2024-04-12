@@ -128,9 +128,9 @@ const Address = (props) => {
         City: selectedObj?.city,
         State: selectedObj?.region,
         ZipCode: selectedObj?.postcode
-      })      
+      })
     }
-  },[selectedObj])
+  }, [selectedObj])
 
   return (
     <Container>
@@ -158,6 +158,7 @@ const Address = (props) => {
                   </InputLabel>
                   <Autocomplete
                     options={list1}
+                    filterOptions={(options) => options}
                     getOptionLabel={(option) =>
                       `${option.number || ""} ${option.street || ""}`
                     }
